@@ -40,9 +40,9 @@ interface LocalStorageData {
 }
 
 const defaultSettings: BotSettings = {
-  botToken: process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN || "",
+  botToken: process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN || "enc:v1:3f93c8da68b15c076742d101822d907e:ca310bf5cabe33b9067f3021b0cbbfd4:9f0d12f365b7ca2f76b3f5c61c99484f25e8b91714d07aad1985345e7770b75c366431ec18b2a442587eb2c4a78d",
   botUsername: "HalpLine_bot",
-  geminiApiKey: process.env.GEMINI_API_KEY || "",
+  geminiApiKey: process.env.GEMINI_API_KEY || "enc:v1:7133ad9e41941a8af0f3a7d978c0435d:6549a3ed9de35c98ef8e7225d80dd9a5:d56a8b82a54e325a4ade1117c1d12df8b504cf24094493c8f4a718fe1787311a57c61fbfad355c255889653b8094ff63fada1dafe3",
   telegramGroupLink: "https://t.me/FlickCove_Top",
   whatsappBackupLink: "https://whatsapp.com/channel/0029Vb7fVTzDzgT78gexpV3V",
   welcomeMessage: "*হ্যালো স্যার*\nএখানে সব বাংলাদেশী ভিডিও পাওয়া যায়। বিভিন্ন ধরনের টিকটকারের লিং*ক ভি*ডিও পাওয় যায় । ভিডিও দেখতে নিচের বাটনে ক্লিক করে । চ্যানেলের মধ্যে থেকে দেখতে পারেন\n।",
@@ -517,7 +517,8 @@ export async function getSettings(): Promise<BotSettings> {
   const store = ensureStorage();
   let token = (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_BOT_TOKEN.trim()) || 
               (process.env.BOT_TOKEN && process.env.BOT_TOKEN.trim()) || 
-              store.settings.botToken || "";
+              store.settings.botToken || 
+              defaultSettings.botToken || "";
   
   // Decrypt if AES-256 encrypted
   if (token.startsWith('enc:v1:')) {
@@ -525,7 +526,8 @@ export async function getSettings(): Promise<BotSettings> {
   }
 
   let geminiKey = (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()) || 
-                  store.settings.geminiApiKey || "";
+                  store.settings.geminiApiKey || 
+                  defaultSettings.geminiApiKey || "";
   if (geminiKey.startsWith('enc:v1:')) {
     geminiKey = decryptSecret(geminiKey);
   }

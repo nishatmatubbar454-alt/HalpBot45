@@ -83,9 +83,9 @@ var RTDB_BASE_URL = firebaseConfig.databaseURL.replace(/\/+$/, "");
 var DATA_DIR = path.resolve(process.cwd(), "data");
 var STORAGE_FILE = path.join(DATA_DIR, "bot_storage.json");
 var defaultSettings = {
-  botToken: process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN || "",
+  botToken: process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN || "enc:v1:3f93c8da68b15c076742d101822d907e:ca310bf5cabe33b9067f3021b0cbbfd4:9f0d12f365b7ca2f76b3f5c61c99484f25e8b91714d07aad1985345e7770b75c366431ec18b2a442587eb2c4a78d",
   botUsername: "HalpLine_bot",
-  geminiApiKey: process.env.GEMINI_API_KEY || "",
+  geminiApiKey: process.env.GEMINI_API_KEY || "enc:v1:7133ad9e41941a8af0f3a7d978c0435d:6549a3ed9de35c98ef8e7225d80dd9a5:d56a8b82a54e325a4ade1117c1d12df8b504cf24094493c8f4a718fe1787311a57c61fbfad355c255889653b8094ff63fada1dafe3",
   telegramGroupLink: "https://t.me/FlickCove_Top",
   whatsappBackupLink: "https://whatsapp.com/channel/0029Vb7fVTzDzgT78gexpV3V",
   welcomeMessage: "*\u09B9\u09CD\u09AF\u09BE\u09B2\u09CB \u09B8\u09CD\u09AF\u09BE\u09B0*\n\u098F\u0996\u09BE\u09A8\u09C7 \u09B8\u09AC \u09AC\u09BE\u0982\u09B2\u09BE\u09A6\u09C7\u09B6\u09C0 \u09AD\u09BF\u09A1\u09BF\u0993 \u09AA\u09BE\u0993\u09AF\u09BC\u09BE \u09AF\u09BE\u09AF\u09BC\u0964 \u09AC\u09BF\u09AD\u09BF\u09A8\u09CD\u09A8 \u09A7\u09B0\u09A8\u09C7\u09B0 \u099F\u09BF\u0995\u099F\u0995\u09BE\u09B0\u09C7\u09B0 \u09B2\u09BF\u0982*\u0995 \u09AD\u09BF*\u09A1\u09BF\u0993 \u09AA\u09BE\u0993\u09AF\u09BC \u09AF\u09BE\u09AF\u09BC \u0964 \u09AD\u09BF\u09A1\u09BF\u0993 \u09A6\u09C7\u0996\u09A4\u09C7 \u09A8\u09BF\u099A\u09C7\u09B0 \u09AC\u09BE\u099F\u09A8\u09C7 \u0995\u09CD\u09B2\u09BF\u0995 \u0995\u09B0\u09C7 \u0964 \u099A\u09CD\u09AF\u09BE\u09A8\u09C7\u09B2\u09C7\u09B0 \u09AE\u09A7\u09CD\u09AF\u09C7 \u09A5\u09C7\u0995\u09C7 \u09A6\u09C7\u0996\u09A4\u09C7 \u09AA\u09BE\u09B0\u09C7\u09A8\n\u0964",
@@ -499,11 +499,11 @@ async function deleteUser(id) {
 }
 async function getSettings() {
   const store = ensureStorage();
-  let token = process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_BOT_TOKEN.trim() || process.env.BOT_TOKEN && process.env.BOT_TOKEN.trim() || store.settings.botToken || "";
+  let token = process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_BOT_TOKEN.trim() || process.env.BOT_TOKEN && process.env.BOT_TOKEN.trim() || store.settings.botToken || defaultSettings.botToken || "";
   if (token.startsWith("enc:v1:")) {
     token = decryptSecret(token);
   }
-  let geminiKey = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() || store.settings.geminiApiKey || "";
+  let geminiKey = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() || store.settings.geminiApiKey || defaultSettings.geminiApiKey || "";
   if (geminiKey.startsWith("enc:v1:")) {
     geminiKey = decryptSecret(geminiKey);
   }
