@@ -1,0 +1,6 @@
+{
+  "name": "HalpLine Bot Admin & AI Engine",
+  "description": "Telegram AI Bot @HalpLine_bot manager with Gemini AI, Firebase user database, and safe broadcast engine.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
