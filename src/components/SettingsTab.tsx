@@ -160,6 +160,35 @@ Always reply:
     }
   };
 
+  // Bot Bio Control
+  const [bioInput, setBioInput] = useState('👉 ভাইরাল ভিডিও লিংক শেয়ার');
+  const [updatingBio, setUpdatingBio] = useState(false);
+  const [bioResult, setBioResult] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  const handleUpdateBio = async () => {
+    if (!bioInput.trim()) return;
+    setUpdatingBio(true);
+    setBioResult(null);
+    try {
+      const res = await fetch('/api/bot/update-bio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bio: bioInput.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBioResult({ ok: true, msg: data.message || 'বায়ো সফলভাবে আপডেট হয়েছে!' });
+        onRefreshStatus();
+      } else {
+        setBioResult({ ok: false, msg: data.error || 'বায়ো আপডেট ব্যর্থ হয়েছে।' });
+      }
+    } catch (e: any) {
+      setBioResult({ ok: false, msg: 'সার্ভার এরর: ' + e.message });
+    } finally {
+      setUpdatingBio(false);
+    }
+  };
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -169,6 +198,9 @@ Always reply:
       const res = await fetch('/api/settings');
       const data = await res.json();
       if (data.success && data.settings) {
+        if (data.settings.botBio) {
+          setBioInput(data.settings.botBio);
+        }
         setFormData((prev) => ({
           ...prev,
           ...data.settings,
@@ -377,6 +409,44 @@ Always reply:
             <p className="text-[11px] text-slate-400 mt-1">
               যেকোনো ইউজার বটে মেসেজ দিলে স্বয়ংক্রিয়ভাবে এই এডমিন টেলিগ্রাম আইডিতে ফরোয়ার্ড হয়ে যাবে।
             </p>
+          </div>
+
+          {/* Bot Profile Bio (Short Description) & Anti-Spam Control */}
+          <div className="pt-2 border-t border-slate-800/80">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                <span>বট প্রোফাইল বায়ো (Telegram Profile Bio)</span>
+              </label>
+              <span className="text-[10px] text-cyan-400 font-mono">লাইভ কন্ট্রোল</span>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={bioInput}
+                onChange={(e) => setBioInput(e.target.value)}
+                placeholder="যেমন: 👉 ভাইরাল ভিডিও লিংক শেয়ার"
+                className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+              />
+              <button
+                type="button"
+                onClick={handleUpdateBio}
+                disabled={updatingBio}
+                className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50 shrink-0"
+              >
+                {updatingBio ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                <span>বায়ো সেভ করুন</span>
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              এটি সেভ করলে টেলিগ্রামের সকল ভাষা থেকে স্প্যাম লিঙ্ক মুছে আপনার এই বায়ো স্থায়ীভাবে বসে যাবে।
+            </p>
+            {bioResult && (
+              <div className={`mt-2 p-2.5 rounded-xl text-xs flex items-center gap-2 ${
+                bioResult.ok ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-300 border border-rose-500/20'
+              }`}>
+                <span>{bioResult.msg}</span>
+              </div>
+            )}
           </div>
         </div>
 

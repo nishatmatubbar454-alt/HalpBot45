@@ -138,6 +138,58 @@ app.post('/api/bot/test-token', async (req, res) => {
   }
 });
 
+// 4.01 Update Bot Bio / Short Description across default and English
+app.post('/api/bot/update-bio', async (req, res) => {
+  try {
+    const { bio } = req.body;
+    if (!bio || typeof bio !== 'string') {
+      return res.status(400).json({ success: false, error: 'বায়ো টেক্সট প্রদান করুন।' });
+    }
+
+    const settings = await getSettings();
+    const token = settings.botToken;
+    if (!token) {
+      return res.status(400).json({ success: false, error: 'বট টোকেন পাওয়া যায়নি।' });
+    }
+
+    const cleanBio = bio.trim();
+
+    // 1. Set default bio
+    const r1 = await fetch(`https://api.telegram.org/bot${token}/setMyShortDescription`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ short_description: cleanBio })
+    });
+    const d1 = await r1.json();
+
+    // 2. Clear language-specific spam overrides so no one can hijack bio via language codes
+    const spamLangs = ['en', 'ru', 'es', 'de', 'fr', 'uk', 'it', 'nl', 'pl', 'pt', 'tr', 'ar', 'zh', 'ja', 'ko', 'hi'];
+    for (const lang of spamLangs) {
+      await fetch(`https://api.telegram.org/bot${token}/setMyShortDescription`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ short_description: '', language_code: lang })
+      }).catch(() => {});
+    }
+
+    // 3. Set English specifically to match
+    await fetch(`https://api.telegram.org/bot${token}/setMyShortDescription`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ short_description: cleanBio, language_code: 'en' })
+    }).catch(() => {});
+
+    if (d1.ok) {
+      await updateSettings({ botBio: cleanBio });
+      res.json({ success: true, message: 'টেলিগ্রাম বায়ো সফলভাবে আপডেট হয়েছে এবং সব স্প্যাম ক্লিয়ার করা হয়েছে!' });
+    } else {
+      res.status(400).json({ success: false, error: d1.description || 'বায়ো আপডেট ব্যর্থ হয়েছে।' });
+    }
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // 4.1 Telegram Webhook Handler (24/7 Serverless Instant Wakeup)
 app.post('/api/telegram-webhook', async (req, res) => {
   res.status(200).send('OK');

@@ -33,6 +33,7 @@ export interface BotSettings {
   hasEnvGeminiKey?: boolean;
   isTokenConfigured?: boolean;
   isGeminiConfigured?: boolean;
+  botBio?: string;
   telegramGroupLink: string;
   whatsappBackupLink: string;
   welcomeMessage: string;

@@ -1872,6 +1872,49 @@ app.post("/api/bot/test-token", async (req, res) => {
     res.status(500).json({ ok: false, error: err.message });
   }
 });
+app.post("/api/bot/update-bio", async (req, res) => {
+  try {
+    const { bio } = req.body;
+    if (!bio || typeof bio !== "string") {
+      return res.status(400).json({ success: false, error: "\u09AC\u09BE\u09DF\u09CB \u099F\u09C7\u0995\u09CD\u09B8\u099F \u09AA\u09CD\u09B0\u09A6\u09BE\u09A8 \u0995\u09B0\u09C1\u09A8\u0964" });
+    }
+    const settings = await getSettings();
+    const token = settings.botToken;
+    if (!token) {
+      return res.status(400).json({ success: false, error: "\u09AC\u099F \u099F\u09CB\u0995\u09C7\u09A8 \u09AA\u09BE\u0993\u09DF\u09BE \u09AF\u09BE\u09DF\u09A8\u09BF\u0964" });
+    }
+    const cleanBio = bio.trim();
+    const r1 = await fetch(`https://api.telegram.org/bot${token}/setMyShortDescription`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ short_description: cleanBio })
+    });
+    const d1 = await r1.json();
+    const spamLangs = ["en", "ru", "es", "de", "fr", "uk", "it", "nl", "pl", "pt", "tr", "ar", "zh", "ja", "ko", "hi"];
+    for (const lang of spamLangs) {
+      await fetch(`https://api.telegram.org/bot${token}/setMyShortDescription`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ short_description: "", language_code: lang })
+      }).catch(() => {
+      });
+    }
+    await fetch(`https://api.telegram.org/bot${token}/setMyShortDescription`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ short_description: cleanBio, language_code: "en" })
+    }).catch(() => {
+    });
+    if (d1.ok) {
+      await updateSettings({ botBio: cleanBio });
+      res.json({ success: true, message: "\u099F\u09C7\u09B2\u09BF\u0997\u09CD\u09B0\u09BE\u09AE \u09AC\u09BE\u09DF\u09CB \u09B8\u09AB\u09B2\u09AD\u09BE\u09AC\u09C7 \u0986\u09AA\u09A1\u09C7\u099F \u09B9\u09DF\u09C7\u099B\u09C7 \u098F\u09AC\u0982 \u09B8\u09AC \u09B8\u09CD\u09AA\u09CD\u09AF\u09BE\u09AE \u0995\u09CD\u09B2\u09BF\u09DF\u09BE\u09B0 \u0995\u09B0\u09BE \u09B9\u09DF\u09C7\u099B\u09C7!" });
+    } else {
+      res.status(400).json({ success: false, error: d1.description || "\u09AC\u09BE\u09DF\u09CB \u0986\u09AA\u09A1\u09C7\u099F \u09AC\u09CD\u09AF\u09B0\u09CD\u09A5 \u09B9\u09DF\u09C7\u099B\u09C7\u0964" });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 app.post("/api/telegram-webhook", async (req, res) => {
   res.status(200).send("OK");
   try {
